@@ -26,31 +26,35 @@ class FCNN(nn.Module):
         return x
 
 
-if __name__ == '__main__':
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
-    ])
+if __name__ == "__main__":
+    transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))]
+    )
 
     train_dataset = torchvision.datasets.MNIST(
-        root='./data', train=True, download=True, transform=transform)
+        root="./data", train=True, download=True, transform=transform
+    )
     test_dataset = torchvision.datasets.MNIST(
-        root='./data', train=False, download=True, transform=transform)
+        root="./data", train=False, download=True, transform=transform
+    )
 
     train_size = int(0.8 * len(train_dataset))
     val_size = len(train_dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(
-        train_dataset, [train_size, val_size])
+        train_dataset, [train_size, val_size]
+    )
 
     train_loader = torch.utils.data.DataLoader(
-        dataset=train_dataset, batch_size=64, shuffle=True)
+        dataset=train_dataset, batch_size=64, shuffle=True
+    )
     val_loader = torch.utils.data.DataLoader(
-        dataset=val_dataset, batch_size=1000, shuffle=False)
+        dataset=val_dataset, batch_size=1000, shuffle=False
+    )
     test_loader = torch.utils.data.DataLoader(
-        dataset=test_dataset, batch_size=1000, shuffle=False)
+        dataset=test_dataset, batch_size=1000, shuffle=False
+    )
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = FCNN()
     model.to(device)
@@ -98,10 +102,12 @@ if __name__ == '__main__':
         val_accuracies.append(val_accuracy)
 
         with torch.no_grad():
-            sparsities.append(measure_sparsity(model)*100)
+            sparsities.append(measure_sparsity(model) * 100)
 
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_losses[-1]
-              :.4f}, Val Accuracy: {val_accuracies[-1]:.2f}%, Sparsity: {sparsities[-1]:.2f}%')
+        print(
+            f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_losses[-1]:.4f}, "
+            + f"Val Accuracy: {val_accuracies[-1]:.2f}%, Sparsity: {sparsities[-1]:.2f}%"
+        )
 
     reconvert(model)
     sparsity = measure_sparsity(model.parameters())
@@ -117,29 +123,29 @@ if __name__ == '__main__':
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-        print(f'Test Accuracy: {100 * correct / total:.2f}%')
+        print(f"Test Accuracy: {100 * correct / total:.2f}%")
 
     fig, ax1 = plt.subplots(figsize=(12, 6))
 
-    ax1.set_xlabel('Epochs')
-    ax1.set_ylabel('Training Loss', color='tab:blue')
-    ax1.plot(train_losses, label='Training Loss', color='tab:blue')
-    ax1.tick_params(axis='y', labelcolor='tab:blue')
+    ax1.set_xlabel("Epochs")
+    ax1.set_ylabel("Training Loss", color="tab:blue")
+    ax1.plot(train_losses, label="Training Loss", color="tab:blue")
+    ax1.tick_params(axis="y", labelcolor="tab:blue")
 
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Validation Accuracy (%)', color='tab:orange')
-    ax2.plot(val_accuracies, label='Validation Accuracy', color='tab:orange')
-    ax2.tick_params(axis='y', labelcolor='tab:orange')
+    ax2.set_ylabel("Validation Accuracy (%)", color="tab:orange")
+    ax2.plot(val_accuracies, label="Validation Accuracy", color="tab:orange")
+    ax2.tick_params(axis="y", labelcolor="tab:orange")
 
     ax3 = ax1.twinx()
-    ax3.set_ylabel('Sparsity (%)', color='tab:green')
-    ax3.plot(sparsities, label='Sparsity', color='tab:green')
-    ax3.tick_params(axis='y', labelcolor='tab:green')
+    ax3.set_ylabel("Sparsity (%)", color="tab:green")
+    ax3.plot(sparsities, label="Sparsity", color="tab:green")
+    ax3.tick_params(axis="y", labelcolor="tab:green")
 
-    ax3.spines['right'].set_position(('outward', 60))
+    ax3.spines["right"].set_position(("outward", 60))
 
     fig.tight_layout()
-    plt.title(f'SoftDEEPR on MNIST')
+    plt.title(f"SoftDEEPR on MNIST")
 
-    torch.save(model.state_dict(), 'sparse_model.pth')
-    plt.savefig("mnist_softdeepr.svg", format='svg', bbox_inches='tight')
+    torch.save(model.state_dict(), "sparse_model.pth")
+    plt.savefig("mnist_softdeepr.svg", format="svg", bbox_inches="tight")

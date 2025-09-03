@@ -31,14 +31,14 @@ def measure_sparsity(parameters, threshold=0):
             else:
                 parameters.append(p)
 
-    total = 0
-    zeros = 0
+    total = []
+    zeros = []
     for p in parameters:
+        total.append(p.numel())
         if threshold:
-            zeros += (p.abs() < threshold).float().sum()
+            zeros.append((p.abs() < threshold).float().sum())
         else:
-            zeros += (p == 0).float().sum()
-        total += p.numel()
+            zeros.append((p == 0).float().sum())
     
     for p in sparse_parameters:
         zeros += (p <= 0).float().sum()
